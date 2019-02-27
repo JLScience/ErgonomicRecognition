@@ -1,8 +1,18 @@
+# The main file of the project containing the program flow
 
 import numpy as np
 import cv2 as cv
 
 FPS = 30
+
+
+def process_input_and_modify_screen(frame):
+
+    # apply mirroring:
+    frame = np.array(frame[:, ::-1, :])
+
+    return frame
+
 
 def main():
     # access camera:
@@ -14,11 +24,11 @@ def main():
         # get next frame from webcam:
         ret, frame = video.read()
 
-        # apply mirroring:
-        frame = np.array(frame[:, ::-1, :])
+        # all calculations and modifications of the input and screen:
+        frame = process_input_and_modify_screen(frame)
 
         # show image and wait for input:
-        cv.imshow('frame', frame)
+        cv.imshow('ErgonomicRecognition', frame)
         ms_wait = int(1000 / FPS)
         key = cv.waitKey(ms_wait)
         if key == 27:
