@@ -3,13 +3,22 @@
 import numpy as np
 import cv2 as cv
 
+import engine
+import painter
+
 FPS = 30
 
 
 def process_input_and_modify_screen(frame):
 
     # apply mirroring:
-    frame = np.array(frame[:, ::-1, :])
+    frame = engine.mirror_vertical(frame)
+
+    # calculate keypoints:
+    key_points, max_scores = engine.calc_keypoints(frame)
+
+    # plot keypoints:
+    painter.paint_keypoints(key_points, max_scores, 0.1, frame, only_torso=False)
 
     return frame
 
