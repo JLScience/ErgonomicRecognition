@@ -16,6 +16,10 @@ def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
 
+def distance(p1, p2):
+    return np.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
+
+
 # calculate keypoints of highest confidence from the network output
 def calc_keypoints(frame):
     heatmaps = POSE_NET.predict(np.expand_dims(frame, 0))
@@ -46,9 +50,43 @@ def get_mean_face_positions(key_points):
 # TODO: consider rotations of the head
 def find_face(key_points):
     x, y = get_mean_face_positions(key_points)
-    w = 0.5 * np.sqrt((key_points[17, 0] - key_points[16, 0])**2 + (key_points[17, 1] - key_points[16, 1])**2)
+    w = 0.5 * distance(key_points[16], key_points[17])
     h = w * 1.5
     angle = 90 + 180 / np.pi * np.arctan2(key_points[15, 0] - key_points[14, 0], key_points[15, 1] - key_points[14, 1])
     return x, y, h, w, angle
+
+
+# control the posture by specific criteria
+def check_posture(key_points, max_scores, confidence_threshold=0.1, face_center_threshold=260):
+    posture_list = [False, False, False, False]
+    xm, ym = get_mean_face_positions(key_points)
+
+    # --- check if head twisted
+    # if one ear is not visible:
+    if max_scores[16] < confidence_threshold or max_scores[17] < confidence_threshold:
+        posture_list[0] = True
+    # if distance between ear and face center is too large (i.e. found ear at wrong location because it is invisible):
+    if distance([ym, xm], key_points[16]) > 2 * distance(key_points[14], key_points[15]):
+        posture_list[0] = True
+    if distance([ym, xm], key_points[17]) > 2 * distance(key_points[14], key_points[15]):
+        posture_list[0] = True
+
+    # --- check if head leaned forward
+    # if both ears y values are above the eyes y values:
+    if key_points[16, 0] < key_points[14, 0] and key_points[17, 0] < key_points[15, 0]:
+        posture_list[1] = True
+
+    # --- check if head leaned sidewards
+    # if the angle between the eyes is too high or too low:
+    angle = 90 + 180 / np.pi * np.arctan2(key_points[15, 0] - key_points[14, 0], key_points[15, 1] - key_points[14, 1])
+    if angle > 100 or angle < 80:
+        posture_list[2] = True
+
+    # --- check if the head is ducked
+    # if the center of the face is below a threshold:
+    if ym > face_center_threshold:
+        posture_list[3] = True
+
+    return posture_list
 
 
