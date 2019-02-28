@@ -1,6 +1,5 @@
 # The main file of the project containing the program flow
 
-import numpy as np
 import cv2 as cv
 
 import engine
@@ -18,7 +17,12 @@ def process_input_and_modify_screen(frame):
     key_points, max_scores = engine.calc_keypoints(frame)
 
     # plot keypoints:
-    painter.paint_keypoints(key_points, max_scores, 0.1, frame, only_torso=False)
+    painter.paint_keypoints(frame, key_points, max_scores, 0.1, only_torso=False)
+
+    # find face:
+    face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle = engine.find_face(key_points)
+    painter.paint_point(frame, face_mean_x, face_mean_y)
+    painter.paint_face_edge(frame, face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle)
 
     return frame
 
@@ -38,6 +42,7 @@ def main():
 
         # show image and wait for input:
         cv.imshow('ErgonomicRecognition', frame)
+
         ms_wait = int(1000 / FPS)
         key = cv.waitKey(ms_wait)
         if key == 27:
