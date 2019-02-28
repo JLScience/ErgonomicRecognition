@@ -8,7 +8,7 @@ import painter
 FPS = 30
 
 
-def process_input_and_modify_screen(frame):
+def process_input_and_modify_screen(frame, debug=True):
 
     # apply mirroring:
     frame = engine.mirror_vertical(frame)
@@ -16,13 +16,20 @@ def process_input_and_modify_screen(frame):
     # calculate keypoints:
     key_points, max_scores = engine.calc_keypoints(frame)
 
-    # plot keypoints:
-    painter.paint_keypoints(frame, key_points, max_scores, 0.1, only_torso=False)
+    if debug:
+        # plot keypoints:
+        painter.paint_keypoints(frame, key_points, max_scores, 0.1, only_torso=False)
 
-    # find face:
-    face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle = engine.find_face(key_points)
-    painter.paint_point(frame, face_mean_x, face_mean_y)
-    painter.paint_face_edge(frame, face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle)
+        # find and plot face:
+        face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle = engine.find_face(key_points)
+        painter.paint_point(frame, face_mean_x, face_mean_y)
+        painter.paint_face_edge(frame, face_mean_x, face_mean_y, face_size_v, face_size_h, face_angle)
+
+    # check if the posture is incorrect:
+    posture_list = engine.check_posture(key_points, max_scores)
+
+    # show signal if posture is incorrect:
+    frame = painter.posture_alert(frame, posture_list)
 
     return frame
 
