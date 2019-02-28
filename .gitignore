@@ -244,3 +244,6 @@ data/
 
 # Compiled python files
 *.pyc
+
+# specific files:
+test.py
