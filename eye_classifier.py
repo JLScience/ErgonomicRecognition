@@ -4,9 +4,9 @@ import numpy as np
 import cv2 as cv
 import h5py
 
-import keras
 from keras.models import Sequential
 from keras.layers import Conv2D, Dense, Dropout
+from keras.optimizers import Adam
 
 
 # called from main.py if eye data gathering is activated; an image of each eye is saved
@@ -46,19 +46,57 @@ def create_dataset():
         print('created dataset ' + label)
 
 
-class Classifier():
+# load the dataset and split it into training and teseting data
+def prepare_data(train_ratio=0.8):
+    # load data:
+    f = h5py.File('data/eye_data/dataset.hdf5')
+    tensor_closed = np.array(f['closed'], dtype=np.uint8)
+    tensor_opened = np.array(f['open'], dtype=np.uint8)
+    num_samples = tensor_opened.shape[0]
+    # shuffle data:
+    p = np.random.permutation(num_samples)
+    tensor_closed = tensor_closed[p]
+    p = np.random.permutation(num_samples)
+    tensor_opened = tensor_opened[p]
+    # create training and test sets:
+    split_idx = int(num_samples*train_ratio)
+    x_train = np.append(tensor_opened[:split_idx, ...], tensor_closed[:split_idx, ...], axis=0)
+    y_train = np.append(np.zeros(split_idx, dtype=np.uint8), np.ones(split_idx, dtype=np.uint8), axis=0)
+    x_test = np.append(tensor_opened[split_idx:, ...], tensor_closed[split_idx:, ...], axis=0)
+    y_test = np.append(np.zeros(num_samples - split_idx, dtype=np.uint8),
+                       np.ones(num_samples - split_idx, dtype=np.uint8), axis=0)
+    # shuffle training set:
+    p = np.random.permutation(x_train.shape[0])
+    x_train = x_train[p]
+    y_train = y_train[p]
+    return x_train, y_train, x_test, y_test
+
+
+class Eye_Classifier():
 
     def __init__(self):
-        pass
+        self.classifier = self.create_classifier()
+        self.classifier.summary()
 
     def create_classifier(self):
-        pass
+        model = Sequential()
+        model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same', input_shape=(64, 64, 3)))
+        model.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Dense(2, activation='sigmoid'))
+        return model
 
     def train(self):
-        pass
+        x_train, y_train, x_test, y_test = prepare_data()
+        print(x_train.shape)
+        print(y_train.shape)
+        print(x_test.shape)
+        print(y_test.shape)
+
 
 
 if __name__ == '__main__':
-    create_dataset()
-    # classifier = Classifier()
-    # classifier.train()
+    # create_dataset()
+    classifier = Eye_Classifier()
+    classifier.train()
