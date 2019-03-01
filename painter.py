@@ -21,7 +21,11 @@ def paint_point(frame, x, y, r=5, color=(255, 255, 255)):
 
 
 def paint_rect(frame, x, y, w, h, color=(0, 0, 255)):
-    cv.rectangle(frame, (int(x+0.5), int(y+0.5)), (int(x+w+0.5), int(y+h+0.5)), color, 2)
+    cv.rectangle(frame, (int(x+0.5), int(y+0.5)), (int(x+w+0.5), int(y+h+0.5)), color, 1)
+
+
+def paint_string(frame, string, x, y):
+    cv.putText(frame, string, (x, y), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv.LINE_AA)
 
 
 def paint_face_edge(frame, c_x, c_y, face_size_v, face_size_h, angle):
@@ -38,16 +42,12 @@ def posture_alert(frame, posture_list):
     new_frame[:, frame.shape[1]:, :] = 255 * np.ones((frame.shape[0], 400, frame.shape[2]), dtype=frame.dtype)
 
     if posture_list[0]:
-        cv.putText(new_frame, notification_list[0], (frame.shape[1]+10, 25),
-                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv.LINE_AA)
+        paint_string(new_frame, notification_list[0], frame.shape[1] + 10, 25)
     if posture_list[1]:
-        cv.putText(new_frame, notification_list[1], (frame.shape[1]+10, 75),
-                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv.LINE_AA)
+        paint_string(new_frame, notification_list[1], frame.shape[1] + 10, 75)
     if posture_list[2]:
-        cv.putText(new_frame, notification_list[2], (frame.shape[1]+10, 125),
-                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv.LINE_AA)
+        paint_string(new_frame, notification_list[2], frame.shape[1] + 10, 125)
     if posture_list[3]:
-        cv.putText(new_frame, notification_list[3], (frame.shape[1]+10, 175),
-                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv.LINE_AA)
+        paint_string(new_frame, notification_list[3], frame.shape[1] + 10, 175)
 
     return new_frame
