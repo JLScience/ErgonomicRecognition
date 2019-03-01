@@ -4,8 +4,9 @@ import numpy as np
 import cv2 as cv
 import h5py
 
+from keras.utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Conv2D, Dense, Dropout
+from keras.layers import Conv2D, Dense, Flatten, Dropout
 from keras.optimizers import Adam
 
 
@@ -75,25 +76,38 @@ def prepare_data(train_ratio=0.8):
 class Eye_Classifier():
 
     def __init__(self):
-        self.classifier = self.create_classifier()
+        self.classifier = self.create_simple_convolutional_network()
         self.classifier.summary()
 
-    def create_classifier(self):
+    def create_simple_convolutional_network(self):
         model = Sequential()
-        model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same', input_shape=(64, 64, 3)))
+        model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same',
+                         input_shape=(64, 64, 3)))
+        model.add(Dropout(0.2))
         model.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Dropout(0.2))
         model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        model.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Flatten())
         model.add(Dense(2, activation='sigmoid'))
         return model
 
     def train(self):
+        # fetch training and test data:
         x_train, y_train, x_test, y_test = prepare_data()
-        print(x_train.shape)
-        print(y_train.shape)
-        print(x_test.shape)
-        print(y_test.shape)
 
+        # pre-process data (input into range [-1, 1]):
+        x_train = x_train / 127.5 - 1
+        x_test = x_test / 127.5 - 1
+        y_train = to_categorical(y_train, 2)
+
+        # train classifier:
+        opt = Adam()
+        self.classifier.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+        self.classifier.fit(x_train, y_train, batch_size=16, epochs=50, validation_data=(x_test, to_categorical(y_test, 2)), verbose=2)
+
+        loss, acc = self.classifier.evaluate(x_test, to_categorical(y_test, 2))
+        print('loss: ' + str(loss))
+        print('acc:  ' + str(acc))
 
 
 if __name__ == '__main__':
