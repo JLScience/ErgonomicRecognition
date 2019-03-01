@@ -1,12 +1,14 @@
 # calculations on the networks output
 
 import numpy as np
+import cv2 as cv
 
 import pose_net
 
 
 POSE_NET = pose_net.build_net()
-
+face_cascade = cv.CascadeClassifier('data/haarcascade_frontalface_default.xml')
+eye_cascade = cv.CascadeClassifier('data/haarcascade_eye.xml')
 
 def mirror_vertical(image):
     return np.array(image[:, ::-1, :])
@@ -46,14 +48,33 @@ def get_mean_face_positions(key_points):
 
 
 # calculate values required to plot an ellipse around the face
-# TODO: improve calculation of height h
-# TODO: consider rotations of the head
 def find_face(key_points):
     x, y = get_mean_face_positions(key_points)
     w = 0.5 * distance(key_points[16], key_points[17])
     h = w * 1.5
     angle = 90 + 180 / np.pi * np.arctan2(key_points[15, 0] - key_points[14, 0], key_points[15, 1] - key_points[14, 1])
     return x, y, h, w, angle
+
+
+# find a rectangle around each eye:
+def find_eyes(key_points):
+    xm, ym = get_mean_face_positions(key_points)
+    d = 0.5 * (distance([ym, xm], key_points[16]) + (distance([ym, xm], key_points[17]))) * 0.8
+    left_eye = (key_points[14, 1] - d/2, key_points[14, 0] - d/2, d, d)
+    right_eye = (key_points[15, 1] - d/2, key_points[15, 0] - d/2, d, d)
+    return left_eye, right_eye
+
+
+def find_face_viola_jones(frame):
+    gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
+    return faces
+
+
+def find_eyes_viola_jones(face_frame):
+    gray_frame = cv.cvtColor(face_frame, cv.COLOR_BGR2GRAY)
+    eyes = eye_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
+    return eyes
 
 
 # control the posture by specific criteria
