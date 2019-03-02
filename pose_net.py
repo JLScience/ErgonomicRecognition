@@ -132,6 +132,8 @@ def build_net():
     model = Model(img_input, [stageT_branch1_out, stageT_branch2_out])
     model.load_weights(WEIGTHS_PATH)
 
+    print('Successfully loaded pose estimator with weights!')
+
     return model
 
 
