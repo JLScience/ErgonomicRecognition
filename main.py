@@ -11,7 +11,7 @@ FPS = 30
 # program switches:
 DEBUG = False
 APPLY_VIOLA_JONES = False
-EYE_DATA_GATHERING = True
+EYE_DATA_GATHERING = False
 KEY_PRESSED = ""
 
 
@@ -53,7 +53,7 @@ def process_input_and_modify_screen(frame):
 
     if EYE_DATA_GATHERING:
         # find and plot eye surrounding:
-        l_eye, r_eye = engine.find_eyes(key_points)
+        l_eye, r_eye = engine.find_eyes(key_points, return_mode="")
         lx, ly, ldx, ldy = int(l_eye[0]), int(l_eye[1]), int(l_eye[2]), int(l_eye[3])
         rx, ry, rdx, rdy = int(r_eye[0]), int(r_eye[1]), int(r_eye[2]), int(r_eye[3])
         if KEY_PRESSED == 'c':
@@ -74,7 +74,13 @@ def process_input_and_modify_screen(frame):
 
     # plot key pressed:
     painter.paint_string(frame, "Key pressed: " + KEY_PRESSED, frame.shape[1]-390, 225)
-    # print(KEY_PRESSED)
+
+    # check whether eyes are opened or closed:
+    lx, ly, ldx, ldy, rx, ry, rdx, rdy = engine.find_eyes(key_points, return_mode='window')
+    l_eye_open, r_eye_open = engine.eye_status(frame[ly+1:ly+ldy, lx+1:lx+ldx], frame[ry+1:ry+rdy, rx+1:rx+rdx])
+
+    painter.paint_eye_status(frame, l_eye_open, r_eye_open)
+
     return frame
 
 
