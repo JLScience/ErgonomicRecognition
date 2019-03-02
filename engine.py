@@ -4,11 +4,13 @@ import numpy as np
 import cv2 as cv
 
 import pose_net
-
+import eye_classifier
 
 POSE_NET = pose_net.build_net()
+EYE_CLASSIFIER = eye_classifier.Eye_Classifier()
 face_cascade = cv.CascadeClassifier('data/haarcascade_frontalface_default.xml')
 eye_cascade = cv.CascadeClassifier('data/haarcascade_eye.xml')
+
 
 def mirror_vertical(image):
     return np.array(image[:, ::-1, :])
@@ -57,12 +59,17 @@ def find_face(key_points):
 
 
 # find a rectangle around each eye:
-def find_eyes(key_points):
+def find_eyes(key_points, return_mode):
     xm, ym = get_mean_face_positions(key_points)
     d = 0.5 * (distance([ym, xm], key_points[16]) + (distance([ym, xm], key_points[17]))) * 0.8
-    left_eye = (key_points[14, 1] - d/2, key_points[14, 0] - d/2, d, d)
-    right_eye = (key_points[15, 1] - d/2, key_points[15, 0] - d/2, d, d)
-    return left_eye, right_eye
+    l_eye = (key_points[14, 1] - d/2, key_points[14, 0] - d/2, d, d)
+    r_eye = (key_points[15, 1] - d/2, key_points[15, 0] - d/2, d, d)
+    if return_mode == 'window':
+        lx, ly, ldx, ldy = int(l_eye[0]), int(l_eye[1]), int(l_eye[2]), int(l_eye[3])
+        rx, ry, rdx, rdy = int(r_eye[0]), int(r_eye[1]), int(r_eye[2]), int(r_eye[3])
+        return lx, ly, ldx, ldy, rx, ry, rdx, rdy
+    else:
+        return l_eye, r_eye
 
 
 def find_face_viola_jones(frame):
@@ -111,3 +118,20 @@ def check_posture(key_points, max_scores, confidence_threshold=0.1, face_center_
     return posture_list
 
 
+def eye_status(img_l_eye, img_r_eye):
+    # TODO: implement error handling
+
+    img_l_eye = cv.resize(img_l_eye, (64, 64))
+    img_r_eye = cv.resize(img_r_eye, (64, 64))
+
+    img_l_eye = np.expand_dims(img_l_eye, axis=0)
+    img_r_eye = np.expand_dims(img_r_eye, axis=0)
+
+    tensor = np.append(img_l_eye, img_r_eye, axis=0)
+
+    y = EYE_CLASSIFIER.apply(tensor)
+
+    l_eye_open = True if y[0] == 0 else False
+    r_eye_open = True if y[1] == 0 else False
+
+    return l_eye_open, r_eye_open
