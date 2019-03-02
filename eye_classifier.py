@@ -75,9 +75,13 @@ def prepare_data(train_ratio=0.8):
 
 class Eye_Classifier():
 
-    def __init__(self):
+    def __init__(self, apply=True):
         self.classifier = self.create_simple_convolutional_network()
-        self.classifier.summary()
+        if apply:
+            self.classifier.load_weights('data/eye_data/eye_classifier_weights.hdf5')
+            print('Successfully loaded eye classifier with weights!')
+        else:
+            self.classifier.summary()
 
     def create_simple_convolutional_network(self):
         model = Sequential()
@@ -87,6 +91,8 @@ class Eye_Classifier():
         model.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
         model.add(Dropout(0.2))
         model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        model.add(Dropout(0.2))
+        model.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
         model.add(Flatten())
         model.add(Dense(2, activation='sigmoid'))
         return model
@@ -96,8 +102,8 @@ class Eye_Classifier():
         x_train, y_train, x_test, y_test = prepare_data()
 
         # pre-process data (input into range [-1, 1]):
-        x_train = x_train / 127.5 - 1
-        x_test = x_test / 127.5 - 1
+        x_train = np.array(x_train / 127.5 - 1, dtype=np.float32)
+        x_test = np.array(x_test / 127.5 - 1, dtype=np.float32)
         y_train = to_categorical(y_train, 2)
 
         # train classifier:
@@ -109,8 +115,20 @@ class Eye_Classifier():
         print('loss: ' + str(loss))
         print('acc:  ' + str(acc))
 
+        self.classifier.save_weights('data/eye_data/eye_classifier_weights.hdf5')
+
+        y_pred = self.classifier.predict(x_test)
+        print(y_test)
+        print(np.round(y_pred, 2))
+
+    def apply(self, imgs):
+        imgs = np.array(imgs / 127.5 - 1, dtype=np.float32)
+        y = self.classifier.predict(imgs)
+        return np.argmax(y, axis=1)
+
 
 if __name__ == '__main__':
     # create_dataset()
-    classifier = Eye_Classifier()
+    classifier = Eye_Classifier(apply=False)
     classifier.train()
+
