@@ -73,6 +73,17 @@ def prepare_data(train_ratio=0.8):
     return x_train, y_train, x_test, y_test
 
 
+# augmentation:
+def reflect_vertical(tensor):
+    reflected = np.zeros(tensor.shape, dtype=tensor.dtype)
+    rows = tensor.shape[1]
+    cols = tensor.shape[2]
+    for i in range(rows):
+        for j in range(cols):
+            reflected[:, i, j, :] = tensor[:, i, cols - 1 - j, :]
+    return reflected
+
+
 class Eye_Classifier():
 
     def __init__(self, apply=True):
@@ -100,6 +111,13 @@ class Eye_Classifier():
     def train(self):
         # fetch training and test data:
         x_train, y_train, x_test, y_test = prepare_data()
+
+        # augment training data:
+        x_train = np.append(x_train, reflect_vertical(x_train), axis=0)
+        y_train = np.append(y_train, y_train, axis=0)
+        p = np.random.permutation(x_train.shape[0])
+        x_train = x_train[p]
+        y_train = y_train[p]
 
         # pre-process data (input into range [-1, 1]):
         x_train = np.array(x_train / 127.5 - 1, dtype=np.float32)
