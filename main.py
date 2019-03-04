@@ -9,6 +9,7 @@ import eye_classifier
 FPS = 30
 
 # program switches:
+RUN = True
 DEBUG = False
 APPLY_VIOLA_JONES = False
 EYE_DATA_GATHERING = False
@@ -65,21 +66,21 @@ def process_input_and_modify_screen(frame):
         painter.paint_rect(frame, l_eye[0], l_eye[1], l_eye[2], l_eye[3])
         painter.paint_rect(frame, r_eye[0], r_eye[1], r_eye[2], r_eye[3])
 
+    if RUN:
+        # check if the posture is incorrect:
+        posture_list = engine.check_posture(key_points, max_scores)
 
-    # check if the posture is incorrect:
-    posture_list = engine.check_posture(key_points, max_scores)
+        # show signal if posture is incorrect:
+        frame = painter.posture_alert(frame, posture_list)
 
-    # show signal if posture is incorrect:
-    frame = painter.posture_alert(frame, posture_list)
+        # check whether eyes are opened or closed:
+        lx, ly, ldx, ldy, rx, ry, rdx, rdy = engine.find_eyes(key_points, return_mode='window')
+        l_eye_open, r_eye_open = engine.eye_status(frame[ly+1:ly+ldy, lx+1:lx+ldx], frame[ry+1:ry+rdy, rx+1:rx+rdx])
+
+        painter.paint_eye_status(frame, l_eye_open, r_eye_open)
 
     # plot key pressed:
-    painter.paint_string(frame, "Key pressed: " + KEY_PRESSED, frame.shape[1]-390, 225)
-
-    # check whether eyes are opened or closed:
-    lx, ly, ldx, ldy, rx, ry, rdx, rdy = engine.find_eyes(key_points, return_mode='window')
-    l_eye_open, r_eye_open = engine.eye_status(frame[ly+1:ly+ldy, lx+1:lx+ldx], frame[ry+1:ry+rdy, rx+1:rx+rdx])
-
-    painter.paint_eye_status(frame, l_eye_open, r_eye_open)
+    painter.paint_string(frame, "Key pressed: " + KEY_PRESSED, frame.shape[1] - 390, 225)
 
     return frame
 
