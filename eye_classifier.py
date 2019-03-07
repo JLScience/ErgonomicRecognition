@@ -105,7 +105,7 @@ class Eye_Classifier():
         model.add(Dropout(0.2))
         model.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
         model.add(Flatten())
-        model.add(Dense(2, activation='sigmoid'))
+        model.add(Dense(1, activation='sigmoid'))
         return model
 
     def train(self):
@@ -122,14 +122,13 @@ class Eye_Classifier():
         # pre-process data (input into range [-1, 1]):
         x_train = np.array(x_train / 127.5 - 1, dtype=np.float32)
         x_test = np.array(x_test / 127.5 - 1, dtype=np.float32)
-        y_train = to_categorical(y_train, 2)
 
         # train classifier:
         opt = Adam()
-        self.classifier.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-        self.classifier.fit(x_train, y_train, batch_size=16, epochs=50, validation_data=(x_test, to_categorical(y_test, 2)), verbose=2)
+        self.classifier.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
+        self.classifier.fit(x_train, y_train, batch_size=16, epochs=30, validation_data=(x_test, y_test), verbose=2)
 
-        loss, acc = self.classifier.evaluate(x_test, to_categorical(y_test, 2))
+        loss, acc = self.classifier.evaluate(x_test, y_test)
         print('loss: ' + str(loss))
         print('acc:  ' + str(acc))
 
@@ -142,7 +141,7 @@ class Eye_Classifier():
     def apply(self, imgs):
         imgs = np.array(imgs / 127.5 - 1, dtype=np.float32)
         y = self.classifier.predict(imgs)
-        return np.argmax(y, axis=1)
+        return y
 
 
 if __name__ == '__main__':
