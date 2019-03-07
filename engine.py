@@ -119,7 +119,10 @@ def check_posture(key_points, max_scores, confidence_threshold=0.1, face_center_
 
 
 def eye_status(img_l_eye, img_r_eye):
-    # TODO: implement error handling
+
+    # handle error appearing if the eye position is not detected:
+    if 0 in img_l_eye.shape or 0 in img_r_eye.shape:
+        return -1, -1
 
     img_l_eye = cv.resize(img_l_eye, (64, 64))
     img_r_eye = cv.resize(img_r_eye, (64, 64))
@@ -131,7 +134,7 @@ def eye_status(img_l_eye, img_r_eye):
 
     y = EYE_CLASSIFIER.apply(tensor)
 
-    l_eye_open = True if y[0] == 0 else False
-    r_eye_open = True if y[1] == 0 else False
+    l_eye_open = y[0, 0]
+    r_eye_open = y[1, 0]
 
     return l_eye_open, r_eye_open
