@@ -54,11 +54,17 @@ def posture_alert(frame, posture_list):
 
 
 def paint_eye_status(frame, l_eye_open, r_eye_open):
-    if l_eye_open:
+    # left eye:
+    if l_eye_open == -1:
+        paint_string(frame, 'left eye undefined', frame.shape[1] - 390, 275)
+    elif l_eye_open < 0.5:
         paint_string(frame, 'left eye opened', frame.shape[1] - 390, 275)
     else:
         paint_string(frame, 'left eye closed', frame.shape[1] - 390, 275)
-    if r_eye_open:
+    # right eye:
+    if r_eye_open == -1:
+        paint_string(frame, 'right eye undefined', frame.shape[1] - 390, 325)
+    elif r_eye_open < 0.5:
         paint_string(frame, 'right eye opened', frame.shape[1] - 390, 325)
     else:
         paint_string(frame, 'right eye closed', frame.shape[1] - 390, 325)
