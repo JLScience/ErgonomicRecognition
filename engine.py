@@ -138,3 +138,60 @@ def eye_status(img_l_eye, img_r_eye):
     r_eye_open = y[1, 0]
 
     return l_eye_open, r_eye_open
+
+
+def track_eye_status(l_status, r_status, l_new, r_new):
+    l_status.append(l_new)
+    r_status.append(r_new)
+    if len(l_status) > 10:
+        l_status.pop(0)
+        r_status.pop(0)
+    return l_status, r_status
+
+
+def check_blink(status):
+    threshold = 0.5
+    opened_before_counter = 0
+    closed_counter = 0
+    opened_after_counter = 0
+    for t in status:
+        if opened_before_counter >= 2:
+            if closed_counter >= 2:
+                if t <= threshold:
+                    opened_after_counter += 1
+                else:
+                    if opened_after_counter == 0:
+                        closed_counter += 1
+                    else:
+                        opened_before_counter = 0
+                        closed_counter = 0
+                        opened_after_counter = 0
+                if closed_counter >= 6:
+                    opened_before_counter = 0
+                    closed_counter = 0
+                    opened_after_counter = 0
+            else:
+                if t >= threshold:
+                    closed_counter += 1
+                else:
+                    if closed_counter == 0:
+                        opened_before_counter += 1
+                    else:
+                        closed_counter = 0
+                        opened_before_counter = 1
+        else:
+            if t <= threshold:
+                opened_before_counter += 1
+            else:
+                opened_before_counter = 0
+                closed_counter = 0
+                opened_after_counter = 0
+        if opened_before_counter >= 2 and closed_counter >= 2 and opened_after_counter >= 2:
+            return True
+    return False
+
+
+def check_right_left_blink(l_status, r_status):
+    pass
+
+
