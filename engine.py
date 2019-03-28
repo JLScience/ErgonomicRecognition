@@ -12,6 +12,8 @@ face_cascade = cv.CascadeClassifier('data/haarcascade_frontalface_default.xml')
 eye_cascade = cv.CascadeClassifier('data/haarcascade_eye.xml')
 
 
+# --- basic functions:
+
 def mirror_vertical(image):
     return np.array(image[:, ::-1, :])
 
@@ -23,6 +25,22 @@ def sigmoid(z):
 def distance(p1, p2):
     return np.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
 
+
+# --- functions for the application of the Viola-Jones method:
+
+def find_face_viola_jones(frame):
+    gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
+    return faces
+
+
+def find_eyes_viola_jones(face_frame):
+    gray_frame = cv.cvtColor(face_frame, cv.COLOR_BGR2GRAY)
+    eyes = eye_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
+    return eyes
+
+
+# --- functions for key point calculation (using pose_net) and further analysis:
 
 # calculate keypoints of highest confidence from the network output
 def calc_keypoints(frame):
@@ -72,20 +90,22 @@ def find_eyes(key_points, return_mode):
         return l_eye, r_eye
 
 
-def find_face_viola_jones(frame):
-    gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
-    return faces
+# calculate the mean distance from nose to face-center (required for threshold calibration):
+def calibration_get_mean_distance_nose_to_face_center(key_points):
+    nose_y = key_points[0, 0]
+    face_mean_y = np.mean([key_points[0, 0], key_points[14, 0], key_points[15, 0]])
+    return np.abs(nose_y - face_mean_y)
 
 
-def find_eyes_viola_jones(face_frame):
-    gray_frame = cv.cvtColor(face_frame, cv.COLOR_BGR2GRAY)
-    eyes = eye_cascade.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
-    return eyes
+# calculate a threshold for the posture analysis:
+def calibration_get_threshold(head_positions, distances):
+    return np.mean(head_positions) + np.mean(distances)
 
 
-# control the posture by specific criteria
-def check_posture(key_points, max_scores, confidence_threshold=0.1, face_center_threshold=260):
+# --- functions for posture analysis:
+
+# inspect the posture by four specific criteria:
+def check_posture(key_points, max_scores, face_center_threshold, confidence_threshold=0.1):
     posture_list = [False, False, False, False]
     xm, ym = get_mean_face_positions(key_points)
 
@@ -118,6 +138,9 @@ def check_posture(key_points, max_scores, confidence_threshold=0.1, face_center_
     return posture_list
 
 
+# --- functions for eye detection and eye status monitoring:
+
+# use binary classifier to check whether the eyes are opened or closed:
 def eye_status(img_l_eye, img_r_eye):
 
     # handle error appearing if the eye position is not detected:
@@ -140,6 +163,7 @@ def eye_status(img_l_eye, img_r_eye):
     return l_eye_open, r_eye_open
 
 
+# create and handle list of previous eye states:
 def track_eye_status(l_status, r_status, l_new, r_new):
     l_status.append(l_new)
     r_status.append(r_new)
@@ -149,6 +173,8 @@ def track_eye_status(l_status, r_status, l_new, r_new):
     return l_status, r_status
 
 
+# detect blinking by evaluating the status of an eye over time:
+# a blinking is detected if a series of opened-closed-opened can be found with each segment lasting for a specific time
 def check_blink(status):
     threshold = 0.5
     opened_before_counter = 0
@@ -191,7 +217,34 @@ def check_blink(status):
     return False
 
 
-def check_right_left_blink(l_status, r_status):
-    pass
+# evaluate whether the event of right-left-blink was detected:
+def check_right_left_blink(l_status, r_status, timer):
+    rl_blink = False
+
+    # if right blink was already detected:
+    if timer < 0:
+        # if right blink was detected too long ago reset:
+        if timer < -10:
+            timer = 1
+
+        # if right blink was not too recently check if left blink is detected:
+        if timer < -3:
+            if check_blink(l_status[:int(-timer)]):
+                rl_blink = True
+                timer = 0
+                l_status = []
+                r_status = []
+
+        timer -= 1
+
+    # if no right blink was detected yet, check for right blink:
+    if timer == 0:
+        if check_blink(r_status):
+            timer = -1
+
+    return rl_blink, timer, l_status, r_status
+
+
+
 
 
