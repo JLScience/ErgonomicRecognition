@@ -26,6 +26,8 @@ Todo ...
 
 ### Requirements
 
+A webcam is required.
+
 The application is tested using Python 3.5 on a machine running Ubuntu 16.04.
 
 Besides OpenCV, Keras (2.2.2) with Tensorflow-GPU (1.4.0) backend is used.
