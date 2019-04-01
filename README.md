@@ -28,7 +28,7 @@ The application is intended to test the possibilities of pose estimation and key
 
 #### Posture Analysis
 
-![Posture Analysis Demo](https://j.gifs.com/L7ZZLw.gif)
+![Posture Analysis Demo 1](https://j.gifs.com/8133km.gif)
 
 
 ### Requirements
