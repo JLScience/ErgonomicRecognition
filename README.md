@@ -25,6 +25,12 @@ The application is intended to test the possibilities of pose estimation and key
 
 ![Calibration Demo](https://j.gifs.com/nxRREE.gif)
 
+
+#### Posture Analysis
+
+![Posture Analysis Demo](https://j.gifs.com/VAvv4M.gif)
+
+
 ### Requirements
 
 A webcam is required.
