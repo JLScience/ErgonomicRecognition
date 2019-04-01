@@ -50,6 +50,12 @@ Four different false postures can be recognized:
 ![Posture Analysis Demo 4](https://j.gifs.com/ZY88l6.gif)
 
 
+### Eye dataset acquisition
+For the training of the eyes opened/closed classifier a data acquisition mode exists.
+
+![Eye data acquisition](https://j.gifs.com/lxRRj6.gif)
+
+
 ## Requirements
 
 A webcam is required.
