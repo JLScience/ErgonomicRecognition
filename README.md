@@ -24,6 +24,8 @@ The application is intended to test the possibilities of pose estimation and key
 Todo ... 
 
 
+![Test](https://j.gifs.com/E8qqZY.gif)
+
 ### Requirements
 
 A webcam is required.
