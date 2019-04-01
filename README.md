@@ -23,8 +23,7 @@ The application is intended to test the possibilities of pose estimation and key
 
 #### Calibration
 
-![Calibration](https://j.gifs.com/8133Rg.gif)
-
+![Calibration Demo](https://j.gifs.com/8133Rg.gif)
 
 ### Requirements
 
