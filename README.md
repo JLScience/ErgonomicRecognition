@@ -28,7 +28,16 @@ The application is intended to test the possibilities of pose estimation and key
 
 #### Posture Analysis
 
+Four different false postures can be recognized: 
+
+##### Head twisted
+
 ![Posture Analysis Demo 1](https://j.gifs.com/8133km.gif)
+
+
+##### Head leaned sidewards
+
+![Posture Analysis Demo 2](https://j.gifs.com/p8ZZG2.gif)
 
 
 ### Requirements
