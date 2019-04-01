@@ -19,38 +19,38 @@ Therefore the application includes the possibility of collecting eye-data for re
 
 The application is intended to test the possibilities of pose estimation and key-point analysis in a real-life scenario.
 
-### Demo
+## Demo
 
-#### Calibration
+### Calibration
 
 ![Calibration Demo](https://j.gifs.com/nxRREE.gif)
 
 
-#### Posture Analysis
+### Posture Analysis
 
 Four different false postures can be recognized: 
 
-##### Head twisted
+#### Head twisted
 
 ![Posture Analysis Demo 1](https://j.gifs.com/8133km.gif)
 
 
-##### Head leaned sidewards
+#### Head leaned sidewards
 
 ![Posture Analysis Demo 2](https://j.gifs.com/p8ZZG2.gif)
 
 
-##### Head leaned forward
+#### Head leaned forward
 
 ![Posture Analysis Demo 3](https://j.gifs.com/Jy88Lo.gif)
 
 
-##### Head ducked
+#### Head ducked
 
 ![Posture Analysis Demo 4](https://j.gifs.com/ZY88l6.gif)
 
 
-### Requirements
+## Requirements
 
 A webcam is required.
 
@@ -58,5 +58,5 @@ The application is tested using Python 3.5 on a machine running Ubuntu 16.04.
 
 Besides OpenCV, Keras (2.2.2) with Tensorflow-GPU (1.4.0) backend is used.
 
-The GPU support is highly recommended since the fps are probably too low for the configuration otherwise.  
+The GPU support is highly recommended since the fps are probably too low for the configuration otherwise (not tested).  
 
