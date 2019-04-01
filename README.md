@@ -52,6 +52,7 @@ Four different false postures can be recognized:
 
 ### Eye dataset acquisition
 For the training of the eyes opened/closed classifier a data acquisition mode exists.
+Pictures can be saved by clicking 'o' (opened) or 'c' (closed).
 
 ![Eye data acquisition](https://j.gifs.com/lxRRj6.gif)
 
