@@ -47,6 +47,8 @@ Four different false postures can be recognized:
 
 ##### Head ducked
 
+![Posture Analysis Demo 4](https://j.gifs.com/ZY88l6.gif)
+
 
 ### Requirements
 
