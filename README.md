@@ -40,6 +40,14 @@ Four different false postures can be recognized:
 ![Posture Analysis Demo 2](https://j.gifs.com/p8ZZG2.gif)
 
 
+##### Head leaned forward
+
+![Posture Analysis Demo 3](https://j.gifs.com/Jy88Lo.gif)
+
+
+##### Head ducked
+
+
 ### Requirements
 
 A webcam is required.
